@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="static-title">NovaSeek 搜尋</title> 
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- V20 視覺優化變量 --- */
+        :root {
+            --nova-blue: #185ADB; 
+            --nova-blue-hover: #1448A8;
+            --background-color: #f1f3f4; /* 輕微的灰色背景 */
+            --content-bg-color: #ffffff; 
+            --border-color: #dadce0; 
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --text-link: #1a0dab;
+            --text-snippet: #4d5156;
+            
+            --content-padding-left: 175px; 
+            --desktop-max-width: 900px;
+            
+            /* 新增: 精緻陰影 */
+            --shadow-light: 0 1px 3px rgba(60,64,67,0.1), 0 1px 2px rgba(60,64,67,0.1);
+            --shadow-focus: 0 4px 10px rgba(60,64,67,0.15), 0 2px 4px rgba(60,64,67,0.1);
+        }
+
+        body { 
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--background-color); 
+            line-height: 1.6;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+        
+        .header { 
+            padding: 15px 0; 
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--content-bg-color);
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* 讓 Header 有輕微懸浮感 */
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            max-width: var(--desktop-max-width); 
+            margin: 0; 
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 20px; 
+            font-weight: 700; 
+            color: var(--nova-blue); 
+            margin-right: 25px;
+            text-decoration: none; 
+            white-space: nowrap; 
+            flex-shrink: 0; 
+        }
+        
+        /* Search Bar */
+        .search-area {
+            display: flex;
+            align-items: center;
+            flex-grow: 1; 
+            max-width: 550px;
+        }
+        .search-form { 
+            display: flex; 
+            width: 100%; 
+            border: 1px solid var(--border-color);
+            border-radius: 24px; 
+            box-shadow: var(--shadow-light); /* 使用精緻陰影 */
+            transition: box-shadow 0.3s, border-color 0.3s;
+            background-color: var(--content-bg-color);
+        }
+        .search-form:hover, .search-form:focus-within {
+            box-shadow: var(--shadow-focus); /* Focus時增加陰影深度 */
+            border-color: transparent; /* 移除邊框以強調陰影 */
+        }
+        #search-input { 
+            flex-grow: 1; 
+            padding: 10px 15px; 
+            border: none;
+            background: none;
+            font-size: 16px; 
+            outline: none; 
+        }
+        .mic-button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            color: var(--text-secondary); 
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+        .mic-button:hover { 
+            color: var(--nova-blue); 
+            transform: scale(1.1); /* 微互動效果 */
+        }
+
+        /* Auth Button Container */
+        .auth-container {
+            flex-grow: 1; 
+            display: flex;
+            justify-content: flex-end;
+            margin-left: 20px;
+            flex-shrink: 0;
+        }
+        .auth-button {
+            padding: 8px 18px; 
+            background-color: var(--nova-blue);
+            border: none;
+            border-radius: 20px; 
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(24, 90, 219, 0.4); 
+        }
+        .auth-button:hover {
+            background-color: var(--nova-blue-hover);
+            box-shadow: 0 4px 8px rgba(24, 90, 219, 0.6); /* 增加 hover 陰影 */
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            max-width: var(--desktop-max-width);
+            margin: 0; 
+            border-bottom: 1px solid var(--border-color);
+            padding-left: var(--content-padding-left); 
+            background-color: var(--content-bg-color);
+        }
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-right: 15px;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .tab-button:hover {
+            color: var(--text-primary);
+        }
+        .tab-button.active {
+            color: var(--nova-blue);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--nova-blue);
+            border-radius: 2px 2px 0 0; 
+        }
+        
+        /* Content Area */
+        .content-area {
+            max-width: var(--desktop-max-width); 
+            margin: 0; 
+            padding-top: 20px;
+        }
+        .search-meta {
+            padding-left: var(--content-padding-left); 
+            margin-bottom: 15px; 
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .results-container {
+            padding-left: var(--content-padding-left); 
+        }
+
+        /* Result Item Styling */
+        .result-item { 
+            background-color: var(--content-bg-color);
+            padding: 18px; /* 增加內邊距 */
+            margin-bottom: 15px; /* 減少間距，讓排版更緊湊 */
+            max-width: 650px; 
+            border: 1px solid #e8e8e8; /* 柔和邊框 */
+            border-radius: 12px; /* 更圓潤的圓角 */
+            box-shadow: var(--shadow-light); /* 精緻陰影 */
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .result-item:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Hover時浮動感 */
+            transform: translateY(-2px); /* 輕微上浮 */
+        }
+        
+        .result-item h3 { margin-top: 0; margin-bottom: 6px; font-size: 18px; font-weight: 500; }
+        .result-item h3 a { color: var(--text-link); text-decoration: none; transition: color 0.2s; }
+        .result-item h3 a:hover { text-decoration: underline; color: var(--nova-blue); }
+        .result-item .url { color: #006621; font-size: 13px; margin-bottom: 8px; display: block; font-weight: 400; }
+        .result-item p { color: var(--text-snippet); line-height: 1.5; font-size: 14px; margin-top: 0; }
+        
+        #status-message { 
+            padding-left: var(--content-padding-left); 
+            text-align: left; 
+            margin-top: 20px; 
+            margin-bottom: 20px;
+            font-size: 15px; 
+            color: var(--text-secondary);
+        }
+
+        /* Image Grid Styling */
+        .image-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .image-item { 
+            background-color: var(--content-bg-color);
+            border: 1px solid #e8e8e8;
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: var(--shadow-light);
+            transition: box-shadow 0.2s;
+        }
+        .image-item:hover { 
+            box-shadow: var(--shadow-focus); 
+        }
+        .image-item a { display: block; height: 100%; }
+        .image-item img { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: contain; 
+            background-color: #f0f0f0; 
+            display: block;
+        }
+
+        /* Pagination Styling */
+        #pagination { 
+            display: flex; 
+            justify-content: flex-start; 
+            margin-top: 40px; 
+            padding-left: var(--content-padding-left); 
+            align-items: center; 
+            padding-bottom: 50px;
+        }
+        .page-button { 
+            background: none; 
+            border: none; 
+            padding: 8px 12px; 
+            margin: 0 5px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 500; 
+            color: var(--text-link); 
+            text-decoration: none; 
+            border-radius: 4px; 
+            transition: background-color 0.2s; 
+            line-height: 1; 
+            min-width: 30px; 
+            text-align: center; 
+            display: inline-block; 
+        }
+        .page-button:hover {
+            background-color: #f0f0f0; /* Hover效果 */
+        }
+        .page-button.number { 
+            color: var(--text-secondary); 
+        }
+        .page-button.active { 
+            color: var(--nova-blue); 
+            font-weight: 700; 
+            position: relative; 
+        }
+        .page-button.active::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: -5px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 70%; 
+            height: 3px; 
+            background-color: var(--nova-blue); 
+            border-radius: 2px; 
+        }
+        .page-button.disabled { opacity: 0.5; cursor: not-allowed; color: var(--text-secondary) !important; }
+
+        
+        /* ************************************** */
+        /* Responsive Design: max-width: 768px (Mobile) */
+        /* ************************************** */
+        @media (max-width: 768px) {
+            
+            :root {
+                --content-padding-left: 0px; 
+            }
+            
+            .header-content { 
+                flex-wrap: wrap; /* Enable wrapping for two rows */
+                padding: 0 10px; 
+                align-items: center; 
+                padding-top: 5px; 
+                margin: 0; 
+                justify-content: flex-start;
+            }
+            
+            /* --- 完美佈局方案：25% (空) / 50% (Logo) / 25% (Auth) --- */
+
+            /* 25% 空白間隔 */
+            .header-content::before {
+                content: '';
+                display: block;
+                flex-basis: 25%; 
+                order: 1; 
+                height: 0;
+            }
+
+            /* 50% Logo 居中 */
+            .logo { 
+                font-size: 18px; 
+                margin: 0; 
+                flex-basis: 50%;
+                order: 2; 
+                text-align: center; 
+            } 
+            
+            /* 25% Auth 靠右 */
+            .auth-container { 
+                order: 3; 
+                flex-basis: 25%;
+                margin-left: 0;
+                justify-content: flex-end; 
+                padding-right: 0;
+            }
+            .auth-button { 
+                padding: 6px 15px; 
+            }
+
+            /* 100% 搜尋欄 (第二行) */
+            .search-area {
+                order: 4; 
+                width: 100%; 
+                flex-basis: 100%;
+                margin-top: 10px; 
+            }
+            
+            /* 內容區域調整 */
+            .tabs-nav, .content-area, .results-container, .search-meta, #status-message, #pagination { 
+                padding-left: 10px; 
+                padding-right: 10px; 
+                max-width: 100%; 
+                width: 100%; 
+                box-sizing: border-box; 
+            }
+
+            .result-item {
+                max-width: 100%;
+                padding: 15px;
+            }
+            
+            /* 圖片網格適應手機 */
+            .image-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+                gap: 10px; 
+            } 
+            .image-item img { 
+                height: 100px; 
+            }
+            
+            /* 分頁居中 */
+            #pagination {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+<div class="header">
+    <div class="container header-content">
+        
+        <a href="https://novaseek.org" class="logo">NovaSeek</a>
+        
+        <div class="search-area">
+            <form id="search-form" class="search-form" onsubmit="return false;">
+                <input type="text" id="search-input" placeholder="搜尋..." required>
+                <button type="button" class="mic-button" id="mic-button" title="Voice Input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button type="submit" id="search-button" style="display:none;">Search</button>
+            </form>
+        </div>
+
+        <div class="auth-container">
+            <a href="https://accounts.novaseek.org/?redirect=https%3A%2F%2Fnovaseek.org%2F" class="auth-button">登入</a>
+        </div>
+    </div>
+</div>
+
+<div class="tabs-nav">
+    <button class="tab-button active" data-search-type="web">全部</button>
+    <button class="tab-button" data-search-type="image">圖片</button>
+</div>
+
+<div class="container content-area">
+    <div id="status-message">請在上方輸入關鍵字開始搜尋。</div>
+
+    <div class="results-container">
+        <div id="image-results-container" style="display:none;">
+            <div id="image-results" class="image-grid"></div>
+        </div>
+
+        <div id="results"></div>
+        
+        <div id="pagination"></div>
+    </div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const GOOGLE_API_KEY = "AIzaSyAsaiTIsZoPeb1rS7yHwyHVnM5qp8TuW8U";
+    const GOOGLE_CX = "0168eba10901d44cd";      
+    const RESULTS_PER_PAGE = 10;
+    const FALLBACK_API_URL = "https://your-backend-api.com/fallback-search"; 
+    
+    // --- DOM Elements ---
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    const staticTitle = document.getElementById('static-title');
+    const resultsDiv = document.getElementById('results');
+    const imageResultsContainer = document.getElementById('image-results-container');
+    const imageResultsDiv = document.getElementById('image-results');
+    const paginationDiv = document.getElementById('pagination');
+    const statusMessageDiv = document.getElementById('status-message');
+    const micButton = document.getElementById('mic-button');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    let currentQuery = '';
+    let currentPage = 1;
+    let totalResults = 0;
+    let currentTab = 'web'; 
+
+    // --- Speech Recognition ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'zh-TW'; 
+
+        recognition.onstart = function() { micButton.classList.add('recording'); };
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            searchInput.value = transcript;
+            updateUrlAndSearch(transcript, 1); 
+        };
+        recognition.onend = function() { micButton.classList.remove('recording'); };
+
+        micButton.addEventListener('click', () => {
+            try {
+                recognition.start();
+            } catch (error) {
+                alert('語音輸入啟動失敗，請確保在 HTTPS 環境下並授予麥克風權限。');
+                console.error('Speech Recognition Error:', error);
+            }
+        });
+    } else {
+        micButton.style.display = 'none'; 
+    }
+
+    // --- Tab Switching ---
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const newType = button.getAttribute('data-search-type');
+            if (newType === currentTab) return; 
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            currentTab = newType;
+
+            updateUrlAndSearch(currentQuery, 1); 
+        });
+    });
+    
+    // --- Fallback Search (Simulated) ---
+    function novaFallbackSearch(query) {
+        statusMessageDiv.innerHTML = `
+            <span style="color: #FF8C00; font-weight: 500;">
+                <i class="fas fa-robot"></i> NovaSeek 備援啟動：
+            </span>
+            <br>
+            主要服務配額用盡，正在啟用維基百科智能爬蟲備援服務。
+            <br>
+            <span style="font-size: 12px; color: #70757a;">
+                (提示：目前顯示模擬結果，請將備援後端服務部署至 ${FALLBACK_API_URL})
+            </span>
+        `;
+        
+        resultsDiv.innerHTML = `
+            <div class="result-item" style="border-left: 4px solid #FF8C00; padding-left: 11px;"> 
+                <h3><a href="https://zh.wikipedia.org/wiki/${encodeURIComponent(query)}" target="_blank">維基百科：${query}</a></h3>
+                <span class="url">zh.wikipedia.org</span>
+                <p>這是一個模擬的維基百科結果。您的後端爬蟲服務將會抓取並格式化真實的條目摘要和連結。</p>
+            </div>
+        `;
+        
+        imageResultsContainer.style.display = 'none';
+        resultsDiv.style.display = 'block';
+        paginationDiv.innerHTML = '';
+    }
+
+    // --- Main Search Execution ---
+    async function executeSearch(query, start) {
+        if (!query) return;
+
+        currentQuery = query;
+        currentPage = Math.floor((start - 1) / RESULTS_PER_PAGE) + 1;
+
+        resultsDiv.innerHTML = '';
+        imageResultsDiv.innerHTML = '';
+        paginationDiv.innerHTML = '';
+        
+        if (currentTab === 'web') {
+            imageResultsContainer.style.display = 'none';
+        } else {
+            imageResultsContainer.style.display = 'grid'; 
+        }
+
+        statusMessageDiv.textContent = '搜尋中...';
+        staticTitle.textContent = `${query} - NovaSeek 搜尋`; 
+
+        let apiUrl;
+        if (currentTab === 'image') {
+            apiUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&searchType=image&start=${start}&num=${RESULTS_PER_PAGE}`;
+        } else {
+            apiUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&start=${start}&num=${RESULTS_PER_PAGE}`;
+        }
+
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            
+            if (!response.ok || data.error) {
+                const errorMessage = data.error ? data.error.message : `狀態碼 ${response.status}`;
+                
+                if (errorMessage.includes('Quota exceeded')) {
+                    novaFallbackSearch(query);
+                    return; 
+                } else {
+                    statusMessageDiv.textContent = `搜尋失敗：${errorMessage}。請檢查 API 設置或配額。`;
+                }
+                return;
+            }
+
+            if (currentTab === 'image') {
+                renderImageResults(data);
+            } else {
+                renderWebResults(data);
+            }
+            
+        } catch (error) {
+            statusMessageDiv.textContent = '連線錯誤，無法呼叫搜尋服務。';
+        }
+    }
+
+    // --- Rendering Functions ---
+    function renderImageResults(data) {
+        resultsDiv.style.display = 'none';
+        imageResultsContainer.style.display = 'grid';
+        imageResultsDiv.innerHTML = '';
+        statusMessageDiv.textContent = '';
+        
+        if (!data.items || data.items.length === 0) {
+            statusMessageDiv.textContent = `找不到與「${currentQuery}」相關的圖片。`;
+            totalResults = 0;
+            renderPagination();
+            return;
+        }
+
+        totalResults = data.searchInformation ? parseInt(data.searchInformation.totalResults.replace(/,/g, '')) : 0;
+        statusMessageDiv.textContent = `找到約 ${data.searchInformation.formattedTotalResults} 項圖片結果。`;
+
+        data.items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'image-item';
+            itemDiv.innerHTML = `
+                <a href="${item.image.contextLink}" target="_blank">
+                    <img src="${item.link}" alt="${item.title}" loading="lazy">
+                </a>
+            `;
+            imageResultsDiv.appendChild(itemDiv);
+        });
+
+        renderPagination(data);
+    }
+
+    function renderWebResults(data) {
+        imageResultsContainer.style.display = 'none';
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = '';
+        statusMessageDiv.textContent = '';
+        
+        if (!data.items || data.items.length === 0) {
+            statusMessageDiv.textContent = `找不到與「${currentQuery}」相關的網頁結果。`;
+            totalResults = 0;
+            renderPagination();
+            return;
+        }
+
+        totalResults = data.searchInformation ? parseInt(data.searchInformation.totalResults.replace(/,/g, '')) : 0;
+        statusMessageDiv.textContent = `找到約 ${data.searchInformation.formattedTotalResults} 項網頁結果。`;
+
+        data.items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'result-item';
+            itemDiv.innerHTML = `
+                <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                <span class="url">${item.displayLink}</span>
+                <p>${item.snippet}</p>
+            `;
+            resultsDiv.appendChild(itemDiv);
+        });
+
+        renderPagination(data);
+    }
+    
+    // --- Pagination and URL Handling ---
+    
+    function renderPagination(data) {
+        paginationDiv.innerHTML = '';
+        if (totalResults === 0) return;
+
+        const maxPage = Math.min(10, Math.ceil(totalResults / RESULTS_PER_PAGE)); 
+        const maxDisplayPages = 5; 
+        
+        let startPage = Math.max(1, currentPage - Math.floor(maxDisplayPages / 2));
+        let endPage = Math.min(maxPage, startPage + maxDisplayPages - 1);
+
+        if (endPage - startPage + 1 < maxDisplayPages) {
+            startPage = Math.max(1, endPage - maxDisplayPages + 1);
+        }
+
+        const prevButton = createPaginationButton('上一頁', currentPage > 1);
+        prevButton.onclick = () => { if (currentPage > 1) { updateUrlAndSearch(currentQuery, currentPage - 1); } };
+        if (currentPage === 1) prevButton.classList.add('disabled');
+        paginationDiv.appendChild(prevButton);
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = createPaginationButton(i, i !== currentPage);
+            pageButton.classList.add('number');
+            if (i === currentPage) {
+                pageButton.classList.add('active');
+            } else {
+                pageButton.onclick = () => updateUrlAndSearch(currentQuery, i);
+            }
+            paginationDiv.appendChild(pageButton);
+        }
+
+        const nextButton = createPaginationButton('下一頁', currentPage < maxPage);
+        nextButton.onclick = () => { if (currentPage < maxPage) { updateUrlAndSearch(currentQuery, currentPage + 1); } };
+        if (currentPage === maxPage) nextButton.classList.add('disabled');
+        paginationDiv.appendChild(nextButton);
+    }
+
+    function createPaginationButton(text, isEnabled) {
+        const button = document.createElement('a');
+        button.className = 'page-button';
+        button.textContent = text;
+        button.href = 'javascript:void(0);'; 
+        if (!isEnabled) { button.classList.add('disabled'); }
+        return button;
+    }
+
+    function updateUrlAndSearch(query, page, type = currentTab) {
+        const start = (page - 1) * RESULTS_PER_PAGE + 1;
+        const params = new URLSearchParams(window.location.search);
+        params.set('q', query);
+        params.set('start', start);
+        params.set('tab', type); 
+
+        history.pushState(null, '', `?${params.toString()}`);
+        
+        executeSearch(query, start);
+        window.scrollTo(0, 0);
+    }
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const query = searchInput.value.trim();
+        if (query) {
+            updateUrlAndSearch(query, 1); 
+        }
+    });
+
+    function initializeSearch() {
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get('q');
+        const start = parseInt(params.get('start')) || 1;
+        const tab = params.get('tab') || 'web';
+
+        currentTab = tab;
+        tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-search-type') === tab) {
+                btn.classList.add('active');
+            }
+        });
+
+        if (query) {
+            searchInput.value = query;
+            executeSearch(query, start);
+        } else {
+            staticTitle.textContent = 'NovaSeek 搜尋';
+            if (tab === 'image') {
+                 imageResultsContainer.style.display = 'grid';
+                 resultsDiv.style.display = 'none';
+            } else {
+                 imageResultsContainer.style.display = 'none';
+                 resultsDiv.style.display = 'block';
+            }
+        }
+    }
+
+    initializeSearch();
+    window.addEventListener('popstate', initializeSearch);
+
+</script>
+
+</body>
+</html>
